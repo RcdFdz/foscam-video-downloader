@@ -16,7 +16,6 @@ ftp = FTP()
 ftp.set_pasv(0)
 ftp.connect(host, port)
 ftp.login(user, password)
-ftp.cwd('.')
 
 clean = Cleaner()
 directorieList, aviFilesPWD = clean.walkDir(ftp.nlst(), ftp.pwd(), ftp)

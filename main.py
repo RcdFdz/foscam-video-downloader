@@ -12,7 +12,6 @@ port = str(config.get('FTP-Credentials','port'))
 user = config.get('FTP-Credentials','user')
 password = config.get('FTP-Credentials','pass')
 
-## conect and move to the correct directorie
 ftp = FTP()
 ftp.set_pasv(0)
 ftp.connect(host, port)

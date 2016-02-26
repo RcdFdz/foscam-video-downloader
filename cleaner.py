@@ -18,20 +18,21 @@ class Cleaner:
 		aviIndexs = [index for index, aviFiles in enumerate(aviFilesInDir) if aviFiles == True]
 
 		if any(aviFilesInDir):
-			 [aviFilesPWD.append([path, filesList[values]]) for values in aviIndexs]
+			 [self.aviFilesPWD.append([path, filesList[values]]) for values in aviIndexs]
 
 	def walkDir(self, directories, path, ftp):
 		currentAviFiles = self.getAVIFiles(directories, path) 
 		currentDirs = self.getCurrentDirs(directories, path)
 		for dirs in currentDirs:
-			directorieList.append(dirs)
+			self.directorieList.append(dirs)
 			try:
 				ftp.cwd(dirs)
 				self.walkDir(ftp.nlst(), ftp.pwd(), ftp)
 			except:
-				directorieList.pop()
+				self.directorieList.pop()
 				ftp.cwd('..')
 				self.walkDir(ftp.nlst(), ftp.pwd(), ftp)
+		return self.directorieList, self.aviFilesPWD
 
 	def isValidVideo(self, path):
 		_, dateFile, timeFile = path[-1].replace('.avi','').split('_')

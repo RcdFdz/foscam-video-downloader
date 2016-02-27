@@ -1,3 +1,4 @@
+import os
 import re
 from log_conf import Logger
 from datetime import datetime
@@ -5,44 +6,50 @@ from datetime import date
 
 class Cleaner:
 
+	def __init__(self, ftpConnection):
+		self.ftp = ftpConnection
+
 	directorieList = []
 	aviFilesPWD = []
 
 	def getCurrentDirs(self, directories, path):
-		directoriesInDir = [bool(re.search('^[^\.]*$', files)) for files in directories]	
+		directoriesInDir = [bool(re.search('^[^\.]*$', files)) for files in directories]
 		directory = [index for index, directory in enumerate(directoriesInDir) if directory == True]
 		return [path + '/' + directories[values] + '/' for values in directory]
 
 	def getAVIFiles(self, filesList, path):
-		aviFilesInDir = [bool(re.search('.avi', files)) for files in filesList]	
+		aviFilesInDir = [bool(re.search('.avi', files)) for files in filesList]
 		aviIndexs = [index for index, aviFiles in enumerate(aviFilesInDir) if aviFiles == True]
 
 		if any(aviFilesInDir):
-			 [self.aviFilesPWD.append([path, filesList[values]]) for values in aviIndexs]
+			[self.aviFilesPWD.append([path, filesList[values]]) for values in aviIndexs]
 
-	def walkDir(self, directories, path, ftp):
-		currentAviFiles = self.getAVIFiles(directories, path) 
+	def walkDir(self, directories, path):
+		currentAviFidles = self.getAVIFiles(directories, path)
 		currentDirs = self.getCurrentDirs(directories, path)
 		for dirs in currentDirs:
 			self.directorieList.append(dirs)
 			try:
-				ftp.cwd(dirs)
-				self.walkDir(ftp.nlst(), ftp.pwd(), ftp)
+				self.ftp.cwd(dirs)
+				self.walkDir(self.ftp.nlst(), self.ftp.pwd())
 			except:
 				self.directorieList.pop()
-				ftp.cwd('..')
-				self.walkDir(ftp.nlst(), ftp.pwd(), ftp)
+				self.ftp.cwd('..')
+				self.walkDir(self.ftp)
 		return self.directorieList, self.aviFilesPWD
+
+	def setTime(self, dateDecimal, timeDecimal):
+		return datetime.strptime(dateDecimal + ' ' + timeDecimal, '%Y%m%d %H%M%S')
 
 	def isValidVideo(self, path):
 		_, dateFile, timeFile = path[-1].replace('.avi','').split('_')
-		dateTime = datetime.strptime(dateFile + ' ' + timeFile,'%Y%m%d %H%M%S')
-		
-		startTime1 = datetime.strptime(dateFile + ' 100000','%Y%m%d %H%M%S')
-		endTime1 = datetime.strptime(dateFile + ' 144500','%Y%m%d %H%M%S')
+		dateTime = self.setTime(dateFile, timeFile)
 
-		startTime2 = datetime.strptime(dateFile + ' 163000','%Y%m%d %H%M%S')
-		endTime2 = datetime.strptime(dateFile + ' 181500','%Y%m%d %H%M%S')
+		startTime1 = self.setTime(dateFile, '100000')
+		endTime1 = self.setTime(dateFile, '144500')
+
+		startTime2 = self.setTime(dateFile, '163000')
+		endTime2 = self.setTime(dateFile, '181500')
 
 		if date.isoweekday(dateTime) <= 5:
 			if (startTime1 <= dateTime <= endTime1) or (startTime2 <= dateTime <= endTime2):
@@ -52,13 +59,13 @@ class Cleaner:
 		else:
 			return True
 
-	def download(self, path, ftp):
+	def download(self, path):
 		filePath = path[0] + '/' + path[1]
 		file = path[1]
 		try:
-		    ftp.retrbinary('RETR %s' % filePath, open(file, 'wb').write)
+		    self.ftp.retrbinary('RETR %s' % filePath, open(file, 'wb').write)
 		except:
-		    logging.warning('ERROR: cannot read file "%s"' % file)
+		    Logger.logr.warning('ERROR: cannot read file "%s"' % file)
 		    os.unlink(file)
 		else:
 		    Logger.logr.info('*** Downloaded "%s" to CWD' % file)

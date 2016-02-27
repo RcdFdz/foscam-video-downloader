@@ -1,4 +1,3 @@
-import os
 import configparser
 from cleaner import *
 from log_conf import Logger
@@ -17,14 +16,14 @@ ftp.set_pasv(0)
 ftp.connect(host, port)
 ftp.login(user, password)
 
-clean = Cleaner()
-directorieList, aviFilesPWD = clean.walkDir(ftp.nlst(), ftp.pwd(), ftp)
+clean = Cleaner(ftp)
+directorieList, aviFilesPWD = clean.walkDir(ftp.nlst(), ftp.pwd())
 
 for path in aviFilesPWD:
 	if clean.isValidVideo(path):
 		Logger.logr.info("Valid: " + str(path[0] + '/' + path[1]))
-		clean.download(path, ftp)
+		clean.download(path)
 	else:
 		Logger.logr.info("Not Valid: " + str(path[0] + '/' + path[1]))
-		
+
 Logger.logr.info("Done")

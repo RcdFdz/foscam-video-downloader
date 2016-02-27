@@ -8,6 +8,8 @@ class Cleaner:
 
 	def __init__(self, ftpConnection):
 		self.ftp = ftpConnection
+		self.directories = self.ftp.nlst()
+		self.path = self.ftp.pwd()
 
 	directorieList = []
 	aviFilesPWD = []
@@ -24,18 +26,20 @@ class Cleaner:
 		if any(aviFilesInDir):
 			[self.aviFilesPWD.append([path, filesList[values]]) for values in aviIndexs]
 
-	def walkDir(self, directories, path):
-		currentAviFidles = self.getAVIFiles(directories, path)
-		currentDirs = self.getCurrentDirs(directories, path)
+	def walkDir(self):
+		currentAviFidles = self.getAVIFiles(self.directories, self.path)
+		currentDirs = self.getCurrentDirs(self.directories, self.path)
 		for dirs in currentDirs:
 			self.directorieList.append(dirs)
 			try:
+				self.directories = self.ftp.nlst()
+				self.path = self.ftp.pwd()
 				self.ftp.cwd(dirs)
-				self.walkDir(self.ftp.nlst(), self.ftp.pwd())
+				self.walkDir()
 			except:
 				self.directorieList.pop()
 				self.ftp.cwd('..')
-				self.walkDir(self.ftp)
+				self.walkDir()
 		return self.directorieList, self.aviFilesPWD
 
 	def setTime(self, dateDecimal, timeDecimal):

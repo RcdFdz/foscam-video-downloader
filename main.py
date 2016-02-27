@@ -17,7 +17,7 @@ ftp.connect(host, port)
 ftp.login(user, password)
 
 clean = Cleaner(ftp)
-directorieList, aviFilesPWD = clean.walkDir(ftp.nlst(), ftp.pwd())
+directorieList, aviFilesPWD = clean.walkDir()
 
 for path in aviFilesPWD:
 	if clean.isValidVideo(path):

@@ -10,13 +10,16 @@ host = config.get('FTP-Credentials','host')
 port = str(config.get('FTP-Credentials','port'))
 user = config.get('FTP-Credentials','user')
 password = config.get('FTP-Credentials','pass')
+time_interval = config.get('Time-Interval','time')
+
+intervals = str(time_interval).split(',')
 
 ftp = FTP()
 ftp.set_pasv(0)
 ftp.connect(host, port)
 ftp.login(user, password)
 
-clean = Cleaner(ftp)
+clean = Cleaner(ftp,intervals)
 directorieList, aviFilesPWD = clean.walkDir()
 
 for path in aviFilesPWD:

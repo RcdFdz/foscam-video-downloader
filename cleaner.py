@@ -6,10 +6,11 @@ from datetime import date
 
 class Cleaner:
 
-	def __init__(self, ftpConnection):
+	def __init__(self, ftpConnection, time_intervals):
 		self.ftp = ftpConnection
 		self.directories = self.ftp.nlst()
 		self.path = self.ftp.pwd()
+		self.time1_start, self.time1_end, self.time2_start, self.time2_end = time_intervals
 
 	directorieList = []
 	aviFilesPWD = []
@@ -49,11 +50,11 @@ class Cleaner:
 		_, dateFile, timeFile = path[-1].replace('.avi','').split('_')
 		dateTime = self.setTime(dateFile, timeFile)
 
-		startTime1 = self.setTime(dateFile, '100000')
-		endTime1 = self.setTime(dateFile, '144500')
+		startTime1 = self.setTime(dateFile, self.time1_start)
+		endTime1 = self.setTime(dateFile, self.time1_end)
 
-		startTime2 = self.setTime(dateFile, '163000')
-		endTime2 = self.setTime(dateFile, '181500')
+		startTime2 = self.setTime(dateFile, self.time2_start)
+		endTime2 = self.setTime(dateFile, self.time2_end)
 
 		if date.isoweekday(dateTime) <= 5:
 			if (startTime1 <= dateTime <= endTime1) or (startTime2 <= dateTime <= endTime2):
